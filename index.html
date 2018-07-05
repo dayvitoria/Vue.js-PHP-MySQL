@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vue.js crud with php and mysql</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div id="root">
+	<h1>Lista de Usuários</h1>
+	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#showingAddModal"@click="showingAddModal = true;">Adicionar novo</button>
+	<hr>
+	<p class="alert alert-danger" v-if="errorMessage">{{errorMessage}}</p>
+
+	<p class="alert alert-success" v-if="successMessage">{{successMessage}}</p>
+	<div class="container">          
+	  <table class="table table-bordered">
+	    <thead>
+	      <tr class="info">
+	        <th>ID</th>
+	        <th>Nome</th>
+	        <th>Email</th>
+	        <th>Telefone</th>
+	        <th>Editar</th>
+	        <th>Deletar</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr v-for="user in users">
+	        <td>{{user.id}}</td>
+	        <td>{{user.nome}}</td>
+	        <td>{{user.email}}</td>
+	        <td>{{user.telefone}}</td>
+	        <td><button type="button" class="btn btn-success" data-toggle="modal" data-target="#showingEditModal" @click="showingEditModal = true; selectUser(user);">Editar</button></td>
+	        <td><button type="button" class="btn btn-danger" data-toggle="modal" data-target="#showingDeleteModal" @click="showingDeleteModal = true; selectUser(user);">Deletar</button></td>
+	      </tr>
+	    </tbody>
+	  </table>
+
+	    <div class="modal fade" id="showingAddModal" role="dialog" v-show="showingAddModal">
+		    <div class="modal-dialog">
+		    
+		      <!-- Modal content-->
+		      <div class="modal-content">
+		        <div class="modal-header">
+		          <button type="button" class="close" data-dismiss="modal">&times;</button>
+		          <h4 class="modal-title">Adicionar novo usuário</h4>
+		        </div>
+		        <div class="modal-body">
+		          <table class="form">
+		          	<tr>
+		          		<th>Nome</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="nome" v-model="newUser.nome"></td>
+		          	</tr>
+		          	<tr>
+		          		<th>Email</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="email" v-model="newUser.email"></td>
+		          	</tr>
+		          	<tr>
+		          		<th>Telefone</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="telefone" v-model="newUser.telefone"></td>
+		          	</tr>
+		          </table>
+		        </div>
+		        <div class="modal-footer">
+		        	<button type="button" class="btn btn-default" data-dismiss="modal" @click= " saveUser();">Adicionar</button>
+		        	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        </div>
+      	      </div>
+    		</div>
+  </div>
+
+    <div class="modal fade" id="showingEditModal" role="dialog" v-show="showingEditModal">
+		    <div class="modal-dialog">
+		    
+		      <!-- Modal content-->
+		      <div class="modal-content">
+		        <div class="modal-header">
+		          <button type="button" class="close" data-dismiss="modal">&times;</button>
+		          <h4 class="modal-title">Editar Usuário</h4>
+		        </div>
+		        <div class="modal-body">
+		          <table class="form">
+		          	<tr>
+		          		<th>Nome</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="nome" v-model="clickedUser.nome"></td>
+		          	</tr>
+		          	<tr>
+		          		<th>Email</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="email" v-model="clickedUser.email"></td>
+		          	</tr>
+		          	<tr>
+		          		<th>Telefone</th>
+		          		<th> : </th>
+		          		<td><input class="form-control" type="text" name="telefone" v-model="clickedUser.telefone"></td>
+		          	</tr>
+		          </table>
+		        </div>
+		        <div class="modal-footer">
+		        <button type="button" class="btn btn-info" data-dismiss="modal" @click=" updateUser();">Atualizar</button>
+		        	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        </div>
+      	      </div>
+    		</div>
+  </div>
+
+    <div class="modal fade" id="showingDeleteModal" role="dialog" v-show="showingDeleteModal">
+		    <div class="modal-dialog">
+		    
+		      <!-- Modal content-->
+		      <div class="modal-content">
+		        <div class="modal-header">
+		          <button type="button" class="close" data-dismiss="modal">&times;</button>
+		          <h4 class="modal-title">Deletar Usuário</h4>
+		        </div>
+		        <div class="modal-body">
+		          <p>Certeza que deseja deletar o usuário {{clickedUser.nome}}?</p>
+		          <button type="button" class="btn btn-info" data-dismiss="modal" @click=" deleteUser();">Sim</button>
+		          <button type="button" class="btn btn-danger" data-dismiss="modal">Não</button>
+		        </div>
+		        <div class="modal-footer">
+		          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        </div>
+      	      </div>
+    		</div>
+  </div>
+	</div>
+</div>
+
+<script type="text/javascript" src="js/axios.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript" src="js/app.js"></script>
+</body>
+</html>
